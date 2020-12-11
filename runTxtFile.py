@@ -10,6 +10,4 @@ with open("items.txt", "r") as file:
         name, link = line.split(",")
 
         priceTracker.main(name, link)
-        #source = priceTracker.get_page_source(link)
-        #price = priceTracker.get_price(source)
-        #priceTracker.save_history(name,price)
+        

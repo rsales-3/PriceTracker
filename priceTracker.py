@@ -1,5 +1,3 @@
-#Is there a way to traverse to a different website that holds the same item. 
-# There was a situation where the website would say.. currently available elsewhere or currently available from other sellers???
 from bs4 import BeautifulSoup
 from datetime import datetime
 import requests, time, sys
@@ -16,21 +14,22 @@ def main(arg1, arg2):
 def comparePrices(price, productName):
     #get previous price
     prevPrice = check_prev(productName).strip().replace('$','')
-    #try converting
-    if(':' in prevPrice): #if single digit price we have ": X.XX"...need to remove ':' in order to read/compare str
+    #we got the price as a string, now we need to convert it to float
+    if(':' in prevPrice): #if we got a single digit price we have ": X.XX"...need to remove ':' in order to read/compare str
         prevPrice = prevPrice.replace(':','').strip()
-    try:
+    try: #try converting
         prevPrice = float(prevPrice)
     except:
         print(f"No previous price to compare against for {productName}.")
-        return
+        return #return as there's no previous price to compare against
     #Converting current price
     try:
         price = float(price.replace('$',''))
     except ValueError:
         print("Current price is unavailable")
         return
-    #Comparing
+    #Eval
+    #Looking to add alert system in place of the print statements...send_SMS function?
     if(price < prevPrice):
         print("There is a reduction in price!")
     elif(price > prevPrice):
@@ -77,7 +76,7 @@ def get_price(source):
     price = soup.find('span', id=price_element_id)
     try:
         return price.text
-    except AttributeError:
+    except AttributeError: #Thinking of adding a parameter in the function that'll return a string that says: "This is a deal!" or "This is a sale!" then shows the previous price that is indicated as sale
         price = soup.find('span', id="priceblock_dealprice") 
         if(price == None):
             price = soup.find('span', id="priceblock_saleprice")
@@ -93,8 +92,6 @@ def get_price(source):
             return price.text    
 
 
-## Append to the top of the csv file???? -- https://www.xspdf.com/resolution/53028942.html
-
 def save_history(productName, price):
     with open(f"data/{productName}.csv", "a") as file:
         print(f"Opening {productName}.csv")
@@ -102,10 +99,10 @@ def save_history(productName, price):
         file.write(f"{current_datetime}, Price: {price}\n")
         print("Writing to csv file!")
 
-def check_prev(productName):
+def check_prev(productName): #We want to read the last couple characters of the csv file
     f = open(f"data/{productName}.csv", "r")
     f.seek(0,2)
-    f.seek(f.tell() - 8, 0)
+    f.seek(f.tell() - 8, 0) #Running back 8 characters to get the price portion
     return(f.read())
 
 
